@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Code X — Neon-Lit Dev Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Monoton&family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0b0a10;
+    --panel:#15121c;
+    --panel-edge:#241f30;
+    --pink:#ff2f92;
+    --cyan:#21e6ff;
+    --amber:#ffb627;
+    --paper:#f2ece1;
+    --paper-dim:#dcd4c3;
+    --ink:#cfc9d9;
+    --ink-dim:#8d859e;
+  }
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--void);
+    color:var(--ink);
+    font-family:'Inter', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+
+  /* subtle grain texture over the whole page */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    pointer-events:none;
+    z-index:200;
+    opacity:0.035;
+    mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a{color:inherit; text-decoration:none;}
+  ul{list-style:none;}
+
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 32px;
+  }
+
+  h1,h2,h3{
+    font-family:'Space Grotesk', sans-serif;
+    letter-spacing:-0.01em;
+  }
+
+  /* ---------- NAV ---------- */
+  header{
+    position:sticky;
+    top:0;
+    z-index:100;
+    background:rgba(11,10,16,0.82);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--panel-edge);
+  }
+  nav.wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:76px;
+  }
+  .logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--paper);
+  }
+  .logo svg{ filter: drop-shadow(0 0 6px var(--pink)) drop-shadow(0 0 2px var(--pink)); }
+  .navlinks{ display:flex; gap:36px; }
+  .navlinks a{
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    transition:color .2s ease;
+    padding:6px 2px;
+    border-bottom:1px solid transparent;
+  }
+  .navlinks a:hover, .navlinks a:focus-visible{
+    color:var(--cyan);
+    border-bottom-color:var(--cyan);
+  }
+  .nav-cta{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    border:1px solid var(--amber);
+    color:var(--amber);
+    padding:9px 16px;
+    border-radius:2px;
+    transition:background .2s ease, color .2s ease, box-shadow .2s ease;
+  }
+  .nav-cta:hover, .nav-cta:focus-visible{
+    background:var(--amber);
+    color:var(--void);
+    box-shadow:0 0 18px rgba(255,182,39,0.5);
+  }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:96px 0 120px;
+    text-align:center;
+    background:
+      radial-gradient(ellipse 60% 45% at 30% 15%, rgba(255,47,146,0.14), transparent 60%),
+      radial-gradient(ellipse 55% 40% at 75% 25%, rgba(33,230,255,0.12), transparent 60%),
+      var(--void);
+    border-bottom:1px solid var(--panel-edge);
+    overflow:hidden;
+  }
+  .hero-brick{
+    position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(11,10,16,0.9), rgba(11,10,16,0.97)),
+      repeating-linear-gradient(0deg, #17131f 0 26px, #14101b 26px 27px),
+      repeating-linear-gradient(90deg, transparent 0 62px, rgba(0,0,0,0.35) 62px 64px);
+    opacity:0.6;
+    z-index:0;
+  }
+  .hero-inner{ position:relative; z-index:1; }
+
+  .hero .eyebrow{ margin-bottom:26px; }
+
+  .signage{
+    font-family:'Monoton', cursive;
+    font-weight:400;
+    font-size:clamp(56px, 11vw, 148px);
+    line-height:0.9;
+    color:#fff;
+    letter-spacing:0.02em;
+    text-shadow:
+      0 0 6px #fff,
+      0 0 16px var(--pink),
+      0 0 32px var(--pink),
+      0 0 64px var(--pink),
+      0 0 120px rgba(255,47,146,0.5);
+    animation: tube-on 2.6s steps(1) 1, flicker 5s ease-in-out infinite 2.6s;
+  }
+  .signage .down{
+    color:#fff;
+    text-shadow:
+      0 0 6px #fff,
+      0 0 16px var(--cyan),
+      0 0 32px var(--cyan),
+      0 0 64px var(--cyan),
+      0 0 120px rgba(33,230,255,0.5);
+  }
+
+  @keyframes tube-on{
+    0%   { opacity:0; }
+    4%   { opacity:1; }
+    8%   { opacity:0.2; }
+    12%  { opacity:1; }
+    14%  { opacity:0.3; }
+    18%  { opacity:1; }
+    100% { opacity:1; }
+  }
+  @keyframes flicker{
+    0%, 92%, 100% { filter:brightness(1); }
+    93% { filter:brightness(0.55); }
+    94% { filter:brightness(1); }
+    95% { filter:brightness(0.7); }
+    96% { filter:brightness(1); }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .signage{ animation:none; opacity:1; }
+  }
+
+  .hero-sub{
+    margin-top:28px;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:500;
+    font-size:clamp(18px, 2.4vw, 24px);
+    color:var(--paper);
+  }
+  .hero-copy{
+    max-width:520px;
+    margin:20px auto 0;
+    font-size:15px;
+    line-height:1.7;
+    color:var(--ink-dim);
+  }
+  .hero-actions{
+    margin-top:40px;
+    display:flex;
+    gap:16px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    padding:14px 26px;
+    border-radius:2px;
+    transition:all .2s ease;
+    display:inline-block;
+  }
+  .btn-primary{
+    background:var(--pink);
+    color:#fff;
+    box-shadow:0 0 22px rgba(255,47,146,0.45);
+  }
+  .btn-primary:hover, .btn-primary:focus-visible{
+    box-shadow:0 0 34px rgba(255,47,146,0.75);
+    transform:translateY(-1px);
+  }
+  .btn-ghost{
+    border:1px solid var(--panel-edge);
+    color:var(--ink);
+  }
+  .btn-ghost:hover, .btn-ghost:focus-visible{
+    border-color:var(--cyan);
+    color:var(--cyan);
+  }
+
+  /* ---------- SECTION HEADS ---------- */
+  section{ padding:110px 0; }
+  .sec-head{ margin-bottom:56px; max-width:640px; }
+  .sec-head .eyebrow{ margin-bottom:14px; }
+  .sec-head h2{
+    font-size:clamp(30px,4vw,42px);
+    color:var(--paper);
+    font-weight:600;
+  }
+  .sec-head p{
+    margin-top:14px;
+    color:var(--ink-dim);
+    font-size:15px;
+    line-height:1.7;
+    max-width:52ch;
+  }
+
+  /* ---------- WORK GRID ---------- */
+  .work{ background:var(--void); }
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3, 1fr);
+    gap:22px;
+  }
+  .card{
+    background:var(--panel);
+    border:1px solid var(--panel-edge);
+    border-radius:6px;
+    padding:36px 24px 22px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    transition:transform .25s ease, border-color .25s ease;
+  }
+  .card:hover{ transform:translateY(-4px); border-color:var(--panel-edge); }
+  .card-sign{
+    font-family:'Monoton', cursive;
+    font-size:26px;
+    line-height:1.3;
+    margin-bottom:22px;
+    min-height:66px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+  .g-pink{ color:#fff; text-shadow:0 0 4px #fff, 0 0 10px var(--pink), 0 0 22px var(--pink), 0 0 44px rgba(255,47,146,0.5);}
+  .g-cyan{ color:#fff; text-shadow:0 0 4px #fff, 0 0 10px var(--cyan), 0 0 22px var(--cyan), 0 0 44px rgba(33,230,255,0.5);}
+  .g-amber{ color:#fff; text-shadow:0 0 4px #fff, 0 0 10px var(--amber), 0 0 22px var(--amber), 0 0 44px rgba(255,182,39,0.5);}
+  .card-meta{
+    border-top:1px solid var(--panel-edge);
+    padding-top:16px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:0.04em;
+    color:var(--ink-dim);
+    line-height:1.8;
+  }
+  .card-meta strong{ display:block; color:var(--ink); font-size:12px; letter-spacing:0.06em; }
+
+  /* ---------- PROCESS ---------- */
+  .process{
+    background:var(--panel);
+    border-top:1px solid var(--panel-edge);
+    border-bottom:1px solid var(--panel-edge);
+  }
+  .steps{
+    display:flex;
+    flex-direction:column;
+  }
+  .step{
+    display:grid;
+    grid-template-columns:110px 1fr;
+    gap:28px;
+    padding:26px 0;
+    border-top:1px solid var(--panel-edge);
+    align-items:baseline;
+  }
+  .step:last-child{ border-bottom:1px solid var(--panel-edge); }
+  .step-num{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    color:var(--pink);
+    letter-spacing:0.05em;
+  }
+  .step-body h3{
+    font-size:19px;
+    color:var(--paper);
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .step-body p{ font-size:14.5px; color:var(--ink-dim); line-height:1.7; max-width:58ch; }
+
+  /* ---------- STUDIO (quiet, paper toned) ---------- */
+  .studio{
+    background:var(--paper);
+    color:#2a2620;
+  }
+  .studio .wrap{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:64px;
+    align-items:start;
+  }
+  .studio .eyebrow{ color:#8a8171; }
+  .studio h2{ color:#211d16; }
+  .studio p{
+    margin-top:18px;
+    font-size:15px;
+    line-height:1.8;
+    color:#4a4438;
+    max-width:52ch;
+  }
+  .ticket{
+    background:#fff;
+    border:1px solid #ded5c1;
+    padding:28px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    line-height:2;
+    color:#3a352a;
+    box-shadow:0 10px 26px rgba(0,0,0,0.06);
+  }
+  .ticket .tline{ display:flex; justify-content:space-between; border-bottom:1px dashed #d8cfba; padding:6px 0; }
+  .ticket .tquote{
+    margin-top:16px;
+    padding-top:16px;
+    font-style:italic;
+    color:#5a5342;
+    border-top:none;
+  }
+
+  /* ---------- QUOTE / CONTACT ---------- */
+  .quote{ background:var(--void); }
+  .quote-shell{
+    background:var(--panel);
+    border:1px solid var(--panel-edge);
+    border-radius:8px;
+    padding:52px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:48px;
+  }
+  .quote-intro h2{ color:var(--paper); font-size:30px; margin-bottom:14px; }
+  .quote-intro p{ color:var(--ink-dim); font-size:14.5px; line-height:1.8; max-width:42ch; }
+  .quote-intro .hours{
+    margin-top:32px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-dim);
+    line-height:2;
+  }
+  .quote-intro .hours strong{ color:var(--ink); }
+
+  form{ display:flex; flex-direction:column; gap:16px; }
+  .field label{
+    display:block;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:0.06em;
+    color:var(--ink-dim);
+    margin-bottom:7px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:var(--void);
+    border:1px solid var(--panel-edge);
+    color:var(--ink);
+    padding:12px 14px;
+    font-family:'Inter', sans-serif;
+    font-size:14px;
+    border-radius:3px;
+    transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus{
+    outline:none;
+    border-color:var(--cyan);
+    box-shadow:0 0 0 3px rgba(33,230,255,0.15);
+  }
+  .field textarea{ resize:vertical; min-height:80px; }
+  .submit-row{ display:flex; align-items:center; gap:14px; margin-top:6px; }
+  .submit-row .hint{ font-size:12px; color:var(--ink-dim); }
+  button.btn-primary{ border:none; cursor:pointer; font-size:13px; }
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    border-top:1px solid var(--panel-edge);
+    padding:44px 0;
+  }
+  footer .wrap{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:16px;
+  }
+  .foot-mark{
+    font-family:'Monoton', cursive;
+    font-size:15px;
+    color:#fff;
+    text-shadow:0 0 4px #fff, 0 0 10px var(--pink), 0 0 22px rgba(255,47,146,0.5);
+  }
+  footer .fine{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    color:var(--ink-dim);
+    letter-spacing:0.03em;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 860px){
+    .navlinks{ display:none; }
+    .grid{ grid-template-columns:1fr 1fr; }
+    .studio .wrap{ grid-template-columns:1fr; }
+    .quote-shell{ grid-template-columns:1fr; padding:34px 24px; }
+    .step{ grid-template-columns:60px 1fr; }
+  }
+  @media (max-width: 560px){
+    .grid{ grid-template-columns:1fr; }
+    .wrap{ padding:0 20px; }
+    section{ padding:76px 0; }
+  }
+
+  :focus-visible{ outline:2px solid var(--cyan); outline-offset:2px; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav class="wrap">
+    <a href="#top" class="logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <path d="M4 20 C 4 8, 22 18, 22 6" stroke="#ff2f92" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+      Code X
+    </a>
+    <ul class="navlinks">
+      <li><a href="#work">Work</a></li>
+      <li><a href="#process">Process</a></li>
+      <li><a href="#studio">Studio</a></li>
+    </ul>
+    <a href="#quote" class="nav-cta">Get a quote</a>
+  </nav>
+</header>
+
+<section class="hero" id="top">
+  <div class="hero-brick"></div>
+  <div class="hero-inner wrap">
+    <div class="eyebrow">Est. 2011 — small studio, shipped in production</div>
+    <h1 class="signage">CODE<span class="down"> X</span></h1>
+    <div class="hero-sub">Software, built by hand. Shipped on schedule.</div>
+    <p class="hero-copy">
+      Every build in this studio runs through the same five stations — brief,
+      design, build, test, ship — with a small team watching it end to end.
+      We build products and interfaces for startups, dev tools, and the
+      occasional 2am side project. One deploy at a time.
+    </p>
+    <div class="hero-actions">
+      <a href="#work" class="btn btn-primary">See the work</a>
+      <a href="#quote" class="btn btn-ghost">Start a quote</a>
+    </div>
+  </div>
+</section>
+
+<section class="work" id="work">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">Selected builds</div>
+      <h2>Projects out in the wild</h2>
+      <p>A handful of the products currently live in production, plus one very committed side project.</p>
+    </div>
+    <div class="grid">
+      <div class="card">
+        <div class="card-sign g-pink">CHECKOUT</div>
+        <div class="card-meta"><strong>E-commerce rebuild</strong>React / Node — 2024</div>
+      </div>
+      <div class="card">
+        <div class="card-sign g-cyan">DASHBOARD</div>
+        <div class="card-meta"><strong>Analytics platform</strong>TypeScript / Postgres — 2023</div>
+      </div>
+      <div class="card">
+        <div class="card-sign g-amber">AUTH//OK</div>
+        <div class="card-meta"><strong>Identity &amp; access layer</strong>Go / Redis — 2025</div>
+      </div>
+      <div class="card">
+        <div class="card-sign g-pink">PIPELINE</div>
+        <div class="card-meta"><strong>CI/CD tooling for a devtools startup</strong>Rust — 2022</div>
+      </div>
+      <div class="card">
+        <div class="card-sign g-cyan">NIGHTWATCH</div>
+        <div class="card-meta"><strong>Uptime &amp; alerting service</strong>Python — 2021</div>
+      </div>
+      <div class="card">
+        <div class="card-sign g-amber">LAUNCHPAD</div>
+        <div class="card-meta"><strong>Personal side project</strong>Next.js — 2024</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="process" id="process">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="eyebrow">How a build gets shipped</div>
+      <h2>Five steps, one deploy at a time</h2>
+      <p>Nothing here is templated — every project runs through the same five stations, in order, before it goes live.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01 — BRIEF</div>
+        <div class="step-body">
+          <h3>Discover</h3>
+          <p>Your goals become a scoped brief, broken into screens and endpoints so the team has a map before writing a line of code.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02 — DESIGN</div>
+        <div class="step-body">
+          <h3>Wireframe &amp; UI</h3>
+          <p>Flows and layouts get sketched, reviewed, and locked before build starts, so nothing gets rebuilt twice.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03 — BUILD</div>
+        <div class="step-body">
+          <h3>Write the code</h3>
+          <p>Feature branches move through the stack — backend, frontend, and infra — with code review on every merge.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04 — TEST</div>
+        <div class="step-body">
+          <h3>Break it first</h3>
+          <p>Automated tests and a staging pass catch what breaks before it ever reaches a real user.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05 — SHIP</div>
+        <div class="step-body">
+          <h3>Deploy</h3>
+          <p>The build goes live, monitored and rolled out gradually, with the team watching the first 24 hours in production.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="studio" id="studio">
+  <div class="wrap">
+    <div>
+      <div class="eyebrow">The studio</div>
+      <h2>A studio, not an agency mill</h2>
+      <p>
+        Code X is a small team working out of one shared workspace, not a
+        pipeline of subcontractors. We only run one project through the
+        build stage at a time, which means every ship gets watched end to
+        end — no outsourced sprints, no template themes standing in for
+        real product work.
+      </p>
+      <p>
+        Most projects take two to six weeks depending on scope and
+        integrations. Rush jobs happen, but a stable release still sets
+        its own pace.
+      </p>
+    </div>
+    <div class="ticket">
+      <div class="tline"><span>Studio</span><span>Code X</span></div>
+      <div class="tline"><span>Founded</span><span>2011</span></div>
+      <div class="tline"><span>Engineers on staff</span><span>2</span></div>
+      <div class="tline"><span>Typical lead time</span><span>2–6 weeks</span></div>
+      <div class="tline"><span>Stack on hand</span><span>TS / Go / Python</span></div>
+      <div class="tquote">"If it doesn't pass CI, it's not done." — studio policy, taped above the monitor</div>
+    </div>
+  </div>
+</section>
+
+<section class="quote" id="quote">
+  <div class="wrap">
+    <div class="quote-shell">
+      <div class="quote-intro">
+        <h2>Start a project</h2>
+        <p>Tell us what you want built. We'll follow up with rough scoping, stack options, and a lead time within two business days.</p>
+        <div class="hours">
+          <div><strong>Studio hours</strong></div>
+          <div>Mon–Fri, 10am–6pm</div>
+          <div>Async replies welcome anytime</div>
+        </div>
+      </div>
+      <form onsubmit="event.preventDefault(); document.getElementById('form-status').textContent='Sent — we\'ll reply within two business days.';">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Your name" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="budget">Budget range</label>
+          <select id="budget">
+            <option>Under $5,000</option>
+            <option>$5,000 – $15,000</option>
+            <option>$15,000 – $40,000</option>
+            <option>$40,000+</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="details">What are you building?</label>
+          <textarea id="details" placeholder="Product or feature, plus any stack preferences"></textarea>
+        </div>
+        <div class="submit-row">
+          <button type="submit" class="btn btn-primary">Send it in</button>
+          <span class="hint" id="form-status">No payment required to scope.</span>
+        </div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="foot-mark">Code X</div>
+    <div class="fine">Remote-first · hello@codex-studio.example · Mon–Fri 10–6</div>
+  </div>
+</footer>
+
+</body>
+</html>
